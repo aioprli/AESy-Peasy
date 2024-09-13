@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
-project(xor_pro)
-add_executable(xor main.cpp key.cpp)
+project(AESPRO)
+
+file(GLOB SOURCES "./*.cpp" "./libs/*.cpp")
+
+add_executable(aes ${SOURCES})
+
 include_directories(../ ./libs)
+
 
 # mkdir build
 # cd build

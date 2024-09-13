@@ -1,5 +1,10 @@
-
+#ifndef KEY_HPP
+#define KEY_HPP
+#include <array>
+#include <chrono>
+#include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <ctime>
 #include <filesystem>
 #include <fstream>
@@ -8,6 +13,15 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#define M_LEN 64 // 每个M块是512位，即64字节
+#define Rn(X, n) ((X << (32 - n)) | (X >> n))
+#define Sn(X, n) (X >> n)
+#define Ch(X, Y, Z) ((X & Y) ^ (~X & Z))
+#define Maj(X, Y, Z) ((X & Y) ^ (X & Z) ^ (Y & Z))
+#define Sigma_E0(X) (Rn(X, 2) ^ Rn(X, 13) ^ Rn(X, 22))
+#define Sigma_E1(X) (Rn(X, 6) ^ Rn(X, 11) ^ Rn(X, 25))
+#define Sigma_o0(X) (Rn(X, 7) ^ Rn(X, 18) ^ Sn(X, 3))
+#define Sigma_o1(X) (Rn(X, 17) ^ Rn(X, 19) ^ Sn(X, 10))
 using std::string;
 using std::vector;
 
@@ -15,21 +29,42 @@ class Key {
   public:
     // crate a key based on time now
     bool key_create(string name = "", string path = "");
-
-    // get the encrypted array based on the key
-    bool get_encrypted_array(string path = "");
-
-    // get the encryption/decryption char/string based on encrypted array
-    char xor_char(char c);
-    string xor_string(string s);
+    int _maxlength = 1000;
 
   private:
-    // encrypted array
-    vector<char> _key;
-
-    // parameters
-    int _flag = 0;
-    int _step = 1;
-    int _length = 4;
-    int _maxlength = 1200;
+    // 获取ms级别当前时间字符串
+    string get_time_ms();
+    // 使用SHA-256生成密钥
+    vector<unsigned int> get_key();
+    // 储存至文件
+    bool save();
 };
+
+class SHA256 {
+  public:
+    void clulateH(const string &input);
+    vector<unsigned int> getH();
+
+  private:
+    void init();
+    unsigned int H[8];
+    static constexpr unsigned int H_init[8] = {
+        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
+    static constexpr unsigned int K[64] = {
+        0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1,
+        0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
+        0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786,
+        0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+        0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147,
+        0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
+        0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b,
+        0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+        0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a,
+        0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
+        0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2};
+    void Hash(std::vector<unsigned int> &M, unsigned int *H);
+    std::vector<unsigned int> prepareMessage(const std::string &input);
+};
+
+#endif

@@ -1,3 +1,5 @@
+#include "AES.hpp"
+#include "key.hpp"
 #include <cmdline.hpp>
 #include <iostream>
 using namespace std;
@@ -42,7 +44,8 @@ int checkargs(cmdline::parser &parser) {
     if (parser.exist("generate-key") + parser.exist("encrypt") +
             parser.exist("decrypt") !=
         1) {
-        cerr << "Multiple modes are selected. Please check whether the input "
+        cerr << "Zero or multiple modes are selected. Please check whether the "
+                "input "
                 "parameters are correct"
              << endl;
         return -1;
@@ -110,7 +113,13 @@ int main(int argc, char *argv[]) {
     int mode = checkargs(cmd);
     // 生成密钥
     if (mode == 1) {
-
+        Key key;
+        cout << cmd.get<string>("key-path") << endl;
+        bool result = key.key_create(cmd.get<string>("key-filename"),
+                                     cmd.get<string>("key-path"));
+        if (result == false) {
+            return -1;
+        }
     }
     // 加密
     else if (mode == 2) {
