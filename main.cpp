@@ -5,57 +5,57 @@
 using namespace std;
 
 void getparsers(int argc, char *argv[], cmdline::parser &parser) {
-    // 生成选择密钥 (bool) - 是否生成新的密钥
+    // Option to generate a key (bool) - Whether to generate a new key
     parser.add("generate-key", 'g', "Generate a new encryption key");
-    // 加密 (bool) - 是否执行加密操作
+    // Encryption (bool) - Whether to perform encryption
     parser.add("encrypt", 'e', "Perform encryption operation");
-    // 解密 (bool) - 是否执行解密操作
+    // Decryption (bool) - Whether to perform decryption
     parser.add("decrypt", 'd', "Perform decryption operation");
 
-    // 生成密钥路径 (string) - 保存生成的密钥的路径
+    // Key path (string) - Path to save the generated key
     parser.add<string>("key-path", 'p',
                        "Path to save the generated key, default current path",
                        false, "");
-    // 密钥文件名 (string) - 生成密钥的文件名
+    // Key filename (string) - Filename for the generated key
     parser.add<string>("key-filename", 'f',
                        "Filename for the generated key, default named\"key\"",
                        false);
 
-    // 输入文件 (string) - 需要加密或解密的输入文件/文件夹路径
+    // Input file (string) - Path to the input file/folder to be encrypted or
+    // decrypted
     parser.add<string>("input-file", 'i', "Path to the input file", false);
-    // 密钥文件 (string) - 用于加密或解密的密钥文件路径
+    // Key file (string) - Path to the key file used for encryption or
+    // decryption
     parser.add<string>("key-file", 'k', "Path to the encryption key file",
                        false);
-    // 输出路径 (string) - 加密或解密后的文件保存路径
-    parser.add<string>("output-path", 'o',
-                       "Path to save the output file(s), default same as root "
-                       "directory of input file(s)",
-                       false);
-    // 密钥模式 (oneof) - 密钥模式选择，如 'AES' 或 'RSA'
-    parser.add<string>("key-mode", 'm', "Key mode for encryption [AES, RSA]",
-                       false, "AES", cmdline::oneof<string>("AES", "RSA"));
+    // Output path (string) - Path to save the encrypted or decrypted file(s)
+    parser.add<string>(
+        "output-path", 'o',
+        "Path to save the output file(s) directory of input file(s)", false);
+    // Key mode (oneof) - Key mode selection, such as 'AES' or 'RSA'
+    parser.add<string>("key-mode", 'm', "Key mode for encryption [CBC, EBC]",
+                       false, "AES", cmdline::oneof<string>("EBC", "CBC"));
 
-    // 解析命令行参数
+    // Parse command-line arguments
     parser.parse_check(argc, argv);
 }
 
 int checkargs(cmdline::parser &parser) {
-    // 检查是否只有一种模式
+    // Check if only one mode is selected
     if (parser.exist("generate-key") + parser.exist("encrypt") +
             parser.exist("decrypt") !=
         1) {
         cerr << "Zero or multiple modes are selected. Please check whether the "
-                "input "
-                "parameters are correct"
+                "input parameters are correct"
              << endl;
         return -1;
     }
 
-    // 生成密钥参数检查
+    // Check parameters for generating a key
     if (parser.exist("generate-key")) {
         return 1;
     }
-    // 加密参数检查
+    // Check parameters for encryption
     else if (parser.exist("encrypt")) {
         if (!parser.exist("input-file")) {
             cerr << "The current selection is encryption, but the input-file "
@@ -70,6 +70,12 @@ int checkargs(cmdline::parser &parser) {
                 << endl;
             return -1;
         }
+        if (!parser.exist("output-path")) {
+            cerr << "The current selection is encryption, but the output-path "
+                    "path is missing"
+                 << endl;
+            return -1;
+        }
         if (!parser.exist("key-mode")) {
             cerr << "The current selection is encryption, but no key-mode is "
                     "selected"
@@ -78,7 +84,7 @@ int checkargs(cmdline::parser &parser) {
         }
         return 2;
     }
-    // 解密参数检查
+    // Check parameters for decryption
     else if (parser.exist("decrypt")) {
         if (!parser.exist("input-file")) {
             cerr << "The current selection is decryption, but the input-file "
@@ -93,6 +99,12 @@ int checkargs(cmdline::parser &parser) {
                 << endl;
             return -1;
         }
+        if (!parser.exist("output-path")) {
+            cerr << "The current selection is decryption, but the output-path "
+                    "path is missing"
+                 << endl;
+            return -1;
+        }
         if (!parser.exist("key-mode")) {
             cerr << "The current selection is decryption, but no key-mode is "
                     "selected"
@@ -105,13 +117,13 @@ int checkargs(cmdline::parser &parser) {
 }
 
 int main(int argc, char *argv[]) {
-    // 解析参数
+    // Parse the arguments
     cmdline::parser cmd;
     getparsers(argc, argv, cmd);
 
-    // 检查参数
+    // Check the arguments
     int mode = checkargs(cmd);
-    // 生成密钥
+    // Generate key
     if (mode == 1) {
         Key key;
         cout << cmd.get<string>("key-path") << endl;
@@ -121,12 +133,21 @@ int main(int argc, char *argv[]) {
             return -1;
         }
     }
-    // 加密
+    // Encryption
     else if (mode == 2) {
-
+        AES encoder(cmd.get<string>("input-file"), cmd.get<string>("key-file"),
+                    cmd.get<string>("output-path"));
+        encoder.encoder();
+        cout << "Encryption completed: " << cmd.get<string>("output-path")
+             << std::endl;
     }
-    // 解密
+    // Decryption
     else if (mode == 3) {
+        AES decoder(cmd.get<string>("input-file"), cmd.get<string>("key-file"),
+                    cmd.get<string>("output-path"));
+        decoder.decoder();
+        cout << "Decryption completed: " << cmd.get<string>("output-path")
+             << std::endl;
     }
     return mode;
 }

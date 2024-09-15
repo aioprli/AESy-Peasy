@@ -13,7 +13,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#define M_LEN 64 // 每个M块是512位，即64字节
+#define M_LEN 64 // Each M block is 512 bits, i.e., 64 bytes
 #define Rn(X, n) ((X << (32 - n)) | (X >> n))
 #define Sn(X, n) (X >> n)
 #define Ch(X, Y, Z) ((X & Y) ^ (~X & Z))
@@ -27,22 +27,20 @@ using std::vector;
 
 class Key {
   public:
-    // crate a key based on time now
+    // Create a key based on the current time
     bool key_create(string name = "", string path = "");
     int _maxlength = 1000;
 
   private:
-    // 获取ms级别当前时间字符串
+    // Get the current time in milliseconds as a string
     string get_time_ms();
-    // 使用SHA-256生成密钥
+    // Use SHA-256 to generate the key
     vector<unsigned int> get_key();
-    // 储存至文件
-    bool save();
 };
 
 class SHA256 {
   public:
-    void clulateH(const string &input);
+    void calculateH(const string &input);
     vector<unsigned int> getH();
 
   private:
