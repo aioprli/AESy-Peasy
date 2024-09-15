@@ -1,4 +1,9 @@
 # AES-256 Encryption Tool
+
+## Available Languages:
+- [English](./README.md)
+- [简体中文](./README/README.zh-CH.md)
+
 This repository provides an AES-256 encryption tool that supports key generation, encryption, and decryption. Currently, only the **ECB** (Electronic Codebook) mode is implemented, but the framework is prepared to support other modes as well as GPU acceleration in future updates.
 
 ## Features
@@ -17,11 +22,10 @@ cmake -build .
 ~~~
 ## Parameters
 
-### 1. Operation Modes (One of the following must be selected)
+### 1. Operation Modes (One and only one of the following must be selected)
 
 - **`--generate-key` / `-g`**
   Generates a new encryption key using SHA-256.
-  No other mode (encryption or decryption) can be selected with this option.
 - **`--encrypt` / `-e`**
   Performs encryption of a file or folder. Requires the `--input-file`,`--output-path`,`--key-file` and `--key-mode` parameters.
 - **`--decrypt` / `-d`**
@@ -62,7 +66,7 @@ cmake -build .
   - `--generate-key`
   - `--encrypt`
   - `--decrypt`
-- When performing **encryption** or **decryption**, both `--input-file` and `--key-file` are required.
+- When performing **encryption** or **decryption**, both `--input-file`,`--output-path`,`--key-file` and `--key-mode` are required.
   Failing to provide these will result in an error.
 - When generating a key (`--generate-key`), you may optionally specify `--key-path` and `--key-filename` to control where and how the key is saved.
 
