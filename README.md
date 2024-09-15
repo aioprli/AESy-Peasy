@@ -13,7 +13,7 @@ This repository provides an AES-256 encryption tool that supports key generation
 mkdir build
 cd build
 cmake ..
-cmake -build .
+cmake --build .
 ~~~
 ## Parameters
 
